@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 class Program
 {
-    private static readonly Dictionary<string, Location> World = new Dictionary<string, Location>();
-    //метод створення світу приватний - ззовні недоступний
-    static void CreateWorld()//граф бтв
+    static Dictionary<string, Location> World = new Dictionary<string, Location>();
+    //метод створення світу
+    static void CreateWorld()
     {
         //places
-        World["City"] = new CityLocation("City");
+        World["City"] = new Location("City");
         World["Field"] = new Location("Field");
         World["Forest"] = new Location("Forest");
         World["Lake"] = new Location("Lake");
@@ -18,28 +19,35 @@ class Program
         World["Forest"].Connect(World["Lake"]);
         World["Lake"].Connect(World["City"]);
         //wild creatures
-        World["Field"].AddWild(new DarkCreature("Shorat", 25, 7, new AttackMove("Bite", 12), new AttackMove("Scratch", 8)));//shadow rat
-        World["Forest"].AddWild(new LightCreature("Mappy", 40, 10, new AttackMove("Slam", 15), new AttackMove("Light Beam", 10), new AttackMove("Bark", 5)));//light type dawg
-        World["Forest"].AddWild(new GrassCreature("Skalie", 35, 11, new AttackMove("Vine Whip", 10), new AttackMove("Seed Bomb", 12)));//grass lizord
-        World["Lake"].AddWild(new WaterCreature("Lumi", 38, 9, new AttackMove("Splash", 14), new HealMove("Healing slime", 10)));//fih
+
+        World["Field"].AddWild(new Creature("Meepy", 30, 8));//sheep
+        World["Field"].AddWild(new Creature("Shorat", 25, 7, new Move("Bite", 12), new Move("Scratch", 8)));//shadow rat
+        World["Forest"].AddWild(new Creature("Mappy", 40, 10, new Move("Slam", 15), new Move("Light Beam", 10), new Move("Bark", 5)));//light type dawg
+        World["Forest"].AddWild(new Creature("Igurass", 35, 11));//grass lizord
+        World["Lake"].AddWild(new Creature("Koipoi", 38, 9, new Move("Splash", 14), new Move("Tackle", 10)));
     }
     //метод створення гравця
-    static void Main()
+    static void Main(string[] args)
     {
 
         CreateWorld();
         Player player = new Player("Evo", World["City"]);
-        player.AddCreature(new FireCreature("Flaminny", 45, 12, new AttackMove ("Tackle", 10), new AttackMove ("Ember", 20)));//fire snail
+        player.Party.Add(new Creature("Flaminny", 45, 12));//fire snail
 
         Console.WriteLine("Catch a creature!");
 
         while (player.Party.Count < 3)
         {
             //гравець вибирає куди йти
-            player.Current.Show();
+            Console.WriteLine("\nYou r here: " + player.Current.Name);
+            Console.WriteLine("Where you want to go?");
+            for (int i = 0; i < player.Current.Neighbours.Count; i++)
+            {
+                Console.WriteLine((i + 1) + " - " + player.Current.Neighbours[i].Name);
+            }
             Console.WriteLine("b - back");
             Console.WriteLine("0 - exit");
-            //гравець вводить вибір
+
             string input = Console.ReadLine();
             if (input == "0")
             {
@@ -53,7 +61,6 @@ class Program
                     continue;
                 }
             }
-            //інвалід ввід
             else
             {
                 int n;
@@ -64,17 +71,21 @@ class Program
                 }
                 player.MoveTo(player.Current.Neighbours[n - 1]);
             }
-            //поліморфізм: у місті лікує, в інших локаціях нічого не робить
-            player.Current.OnEnter(player);
-            //гравець зустрічає дикого крітера
+
+            if (player.Current.Name == "City")
+            {
+                player.HealAll();
+                Console.WriteLine("Creatures healed.");
+            }
+
             Creature wild = player.Current.GetWild();
             if (wild != null)
             {
                 Battle battle = new Battle(player, wild);
                 battle.Start();
 
-                //додати дикого крітера до парті гравця, якщо він не в парті
-                if (!battle.Caught)
+                //
+                if (!player.Party.Contains(wild))
                 {
                     wild.Heal();
                     player.Current.AddWild(wild);
@@ -82,7 +93,9 @@ class Program
                 if (player.AllDead())
                 {
                     Console.WriteLine("All your creatures have fainted. You are back in the city.");
-                    player.Respawn(World["City"]);
+                    player.Current = World["City"];
+                    player.History.Clear();
+                    player.HealAll();
                 }
             }
         }

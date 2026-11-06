@@ -43,24 +43,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AttackMove.cs" />
     <Compile Include="Battle.cs" />
-    <Compile Include="CityLocation.cs" />
     <Compile Include="Creature.cs" />
-    <Compile Include="DarkCreature.cs" />
-    <Compile Include="FireCreature.cs" />
-    <Compile Include="GrassCreature.cs" />
-    <Compile Include="HealMove.cs" />
-    <Compile Include="IDamageable.cs" />
-    <Compile Include="IHealable.cs" />
-    <Compile Include="IShowable.cs" />
-    <Compile Include="LightCreature.cs" />
     <Compile Include="Location.cs" />
     <Compile Include="Move.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WaterCreature.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

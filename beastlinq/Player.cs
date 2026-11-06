@@ -1,34 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 
-public class Player
+class Player
 {
-    //стартові стати(лока імя) інкапсуляція шоб не можна було змінювати локацію ззовні і монстра теж
-    public string Name { get; private set; }
-    public Location Current { get; private set; }
-    private readonly List<Creature> party = new List<Creature>();
-    private readonly Stack<Location> history = new Stack<Location>();//history of locations
-    public IReadOnlyList<Creature> Party
-    {
-        get { return party; }
-    }
+    //стартові стати(лока імя)
+    public string Name { get; set; }
+    public List<Creature> Party = new List<Creature>();
+    public Location Current { get; set; }
+    public Stack<Location> History { get; set; }//повернення назад
+
     public Player(string name, Location start)
     {
         Name = name;
         Current = start;
-    }
-    //метод додавання крітера в команду
-    public void AddCreature(Creature c)
-    {
-        if (c != null)
-            party.Add(c);
+        Party = new List<Creature>();
+        History = new Stack<Location>();
     }
     //перший крітер
     public Creature GetActive()
     {
-        foreach (Creature c in party)
+        foreach (Creature c in Party)
         {
-            if (!c.IsDead)
+            if (!c.IsDead())
                 return c;
         }
         return null;
@@ -41,32 +34,23 @@ public class Player
     //хілка
     public void HealAll()
     {
-        foreach (IHealable c in party)
+        foreach (Creature c in Party)
         {
             c.Heal();
         }
     }
-    //метод передвіженія
     public void MoveTo(Location next)
     {
-        history.Push(Current);
+        History.Push(Current);
         Current = next;
     }
-    //метод повернення
     public bool GoBack()
     {
-        if (history.Count > 0)
+        if (History.Count > 0)
         {
-            Current = history.Pop();
+            Current = History.Pop();
             return true;
         }
         return false;
-    }
-    //респавн після смерті
-    public void Respawn(Location home)
-    {
-        Current = home;
-        history.Clear();
-        HealAll();
     }
 }
